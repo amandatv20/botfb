@@ -2,11 +2,11 @@
 {% extends "template.html" %}
 
 {% block name_menu %}
-	Spam Comment in Fanspage
+	Spam Comment in Group
 {% endblock %}
 
 {% block input_fields %}
-   {{core.input("fa fa-user", "Username Fanspage", "id_target")}}
+   {{core.input("fa fa-user", "Id Group", "id_target")}}
    {{core.input("fa fa-comments", "Comment Value", "msg")}}
 	{{core.input("fa fa-thumbs-up", "Limit", "limit", type = "number")}}
 {% endblock %}
@@ -34,8 +34,8 @@
 					$.ajax({
 		 				url: `/function/dump`,
 		 				data: {
-		 					"func":"comment_post_fanspage",
-                     "username":user,
+		 					"func":"comment_post_grup",
+                     "id":user,
 		 					"limit":limit_value,
 		 				},
 		 				method: "GET",

@@ -2,12 +2,10 @@
 {% extends "template.html" %}
 
 {% block name_menu %}
-	Spam Comment in Fanspage
+	{{title}}
 {% endblock %}
 
 {% block input_fields %}
-   {{core.input("fa fa-user", "Username Fanspage", "id_target")}}
-   {{core.input("fa fa-comments", "Comment Value", "msg")}}
 	{{core.input("fa fa-thumbs-up", "Limit", "limit", type = "number")}}
 {% endblock %}
 
@@ -22,45 +20,50 @@
 			tombol.click(gas);
 
 			function gas() {
-            const msg = $("#msg").val();
-            const user = $("#id_target").val();
 				const limit_value = parseInt(limit.val())
 
-				if (user == "" || msg == "" || !limit_value && limit_value != 0) {
+				if (!limit_value && limit_value != 0) {
 					log.append("<span>there must be no blank input!</span>");
-				} else if (limit_value < 1 || limit_value > 80) {
-					log.append("<span>limit min: 1 max: 80</span>");
+				} else if (limit_value < 1 || limit_value > 100) {
+					log.append("<span>limit min: 1 max: 100</span>");
 				} else {
-					$.ajax({
-		 				url: `/function/dump`,
-		 				data: {
-		 					"func":"comment_post_fanspage",
-                     "username":user,
-		 					"limit":limit_value,
-		 				},
-		 				method: "GET",
-		 				beforeSend: function() {
-		 					log.append("Get data ...");
-		 					tombol.toggleClass("d-none");
-		 				},
-		 				success: async function(data){
-		 					data = $.parseJSON(data);
-		 					if (data.status) {
-                        log.append(`<span>Target: <span class="font-weight-bold">${data.title}</span></span>`)
-		 						data = data.items;
-                        await sleep(2500);
-		 						log.append(`<span>Total: ${data.length}</span>`)
-                        await sleep(1000);
-                        log.append("<span>Process ... </span>")
-		 						gas_process(data);
-		 					}
-		 				}
-		 			});
+               swal({
+                 title: "Warning !!!",
+                 text: `are you sure for execute this process?`,
+                 icon: "warning",
+                 buttons: true,
+                 dangerMode: true,
+               })
+               .then(function(arg) {
+                  if (arg) {
+                     $.ajax({
+                        url: `/function/dump`,
+                        data: {
+                           "func":"{{func_dump}}",
+                           "limit":limit_value,
+                        },
+                        method: "GET",
+                        beforeSend: function() {
+                           log.append("Get data ...");
+                           tombol.toggleClass("d-none");
+                        },
+                        success: async function(data){
+                           data = $.parseJSON(data);
+                           if (data.status) {
+                              data = data.items;
+                              log.append(`<span>Total: ${data.length}</span>`)
+                              await sleep(1000);
+                              log.append("<span>Process ... </span>")
+                              gas_process(data);
+                           }
+                        }
+                     });
+                  }
+               });
 				}
 			}
 
 			async function gas_process(data){
-            const msg = $("#msg").val();
             if (data.length == 0) {
                log.append("<span>Done!</span>")
                tombol.toggleClass("d-none");
@@ -70,16 +73,19 @@
             let total_success = 0;
             let total_failed = 0;
             for (let i = 0; i < data.length; i++){
-               url = data[i];
+               {% if index_id == "" %}
+                  id = data[i];
+               {% else %}
+                  id = data[i][parseInt("{{index_id}}")];
+               {% endif %}
                await sleep(300);
                await new Promise(resolve => {
                   resolve($.ajax({
-                     url: `/function/comment`,
+                     url: `/function/{{func_process}}`,
                      data: {
-                        "url":url,
-                        "comment_value":msg,
+                        "id":id,
                      },
-                     method: "POST",
+                     method: "{{method}}",
                      success: function(data){
                         data = $.parseJSON(data);
                         if (data.status) {
